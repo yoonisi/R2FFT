@@ -4,7 +4,7 @@
  with Block Floating-Point
  **/
 
-module R2FFT
+module R2FFT_tribuf
   #(
     parameter FFT_LENGTH = 1024, // FFT Frame Length, 2^N
     parameter FFT_DW = 16,       // Data Bitwidth
@@ -43,22 +43,54 @@ module R2FFT
     input wire [FFT_DW-1:0] 	    twdr_cos,
     
     // block ram0
-    output wire 		    ract_ram0,
-    output wire [FFT_N-1-1:0] 	    ra_ram0,
-    input wire [FFT_DW*2-1:0] 	    rdr_ram0,
+    output wire 		    ract_ram0_bank0,
+    output wire [FFT_N-1-1:0] 	    ra_ram0_bank0,
+    input wire [FFT_DW*2-1:0] 	    rdr_ram0_bank0,
    
-    output wire 		    wact_ram0,
-    output wire [FFT_N-1-1:0] 	    wa_ram0,
-    output wire [FFT_DW*2-1:0] 	    wdw_ram0,
+    output wire 		    wact_ram0_bank1,
+    output wire [FFT_N-1-1:0] 	    wa_ram0_bank1,
+    output wire [FFT_DW*2-1:0] 	    wdw_ram0_bank1,
+
+    output wire 		    ract_ram0_bank2,
+    output wire [FFT_N-1-1:0] 	    ra_ram0_bank2,
+    input wire [FFT_DW*2-1:0] 	    rdr_ram0_bank2,
+   
+    output wire 		    wact_ram0_bank0,
+    output wire [FFT_N-1-1:0] 	    wa_ram0_bank0,
+    output wire [FFT_DW*2-1:0] 	    wdw_ram0_bank0,
+
+    output wire 		    ract_ram0_bank1,
+    output wire [FFT_N-1-1:0] 	    ra_ram0_bank1,
+    input wire [FFT_DW*2-1:0] 	    rdr_ram0_bank1,
+   
+    output wire 		    wact_ram0_bank2,
+    output wire [FFT_N-1-1:0] 	    wa_ram0_bank2,
+    output wire [FFT_DW*2-1:0] 	    wdw_ram0_bank2,
    
     // block ram1
-    output wire 		    ract_ram1,
-    output wire [FFT_N-1-1:0] 	    ra_ram1,
-    input wire [FFT_DW*2-1:0] 	    rdr_ram1,
+    output wire 		    ract_ram1_bank0,
+    output wire [FFT_N-1-1:0] 	    ra_ram1_bank0,
+    input wire [FFT_DW*2-1:0] 	    rdr_ram1_bank0,
 
-    output wire 		    wact_ram1,
-    output wire [FFT_N-1-1:0] 	    wa_ram1,
-    output wire [FFT_DW*2-1:0] 	    wdw_ram1
+    output wire 		    wact_ram1_bank1,
+    output wire [FFT_N-1-1:0] 	    wa_ram1_bank1,
+    output wire [FFT_DW*2-1:0] 	    wdw_ram1_bank1,
+   
+    output wire 		    ract_ram1_bank2,
+    output wire [FFT_N-1-1:0] 	    ra_ram1_bank2,
+    input wire [FFT_DW*2-1:0] 	    rdr_ram1_bank2,
+
+    output wire 		    wact_ram1_bank0,
+    output wire [FFT_N-1-1:0] 	    wa_ram1_bank0,
+    output wire [FFT_DW*2-1:0] 	    wdw_ram1_bank0,
+   
+    output wire 		    ract_ram1_bank1,
+    output wire [FFT_N-1-1:0] 	    ra_ram1_bank1,
+    input wire [FFT_DW*2-1:0] 	    rdr_ram1_bank1,
+
+    output wire 		    wact_ram1_bank2,
+    output wire [FFT_N-1-1:0] 	    wa_ram1_bank2,
+    output wire [FFT_DW*2-1:0] 	    wdw_ram1_bank2
    
     );
 
@@ -84,17 +116,17 @@ module R2FFT
 			     PHASE_0,
 			     PHASE_1,
 			     PHASE_2
-			     } tri_buf_status_t;
-   tri_buf_status_t tri_buf_status;
+			     } tribuf_status_t;
+   tribuf_status_t tribuf_status;
    always @ ( posedge clk ) begin
       if ( rst ) begin
-	 tri_buf_status <= PHASE_0;
+	 tribuf_status <= PHASE_0;
       end else if ( run ) begin
-	 case ( tri_buf_status )
-	   PHASE_0: tri_buf_status <= PHASE_1;
-	   PHASE_1: tri_buf_status <= PHASE_2;
-	   PHASE_2: tri_buf_status <= PHASE_0;
-	 endcase // case ( tri_buf_status )	 
+	 case ( tribuf_status )
+	   PHASE_0: tribuf_status <= PHASE_1;
+	   PHASE_1: tribuf_status <= PHASE_2;
+	   PHASE_2: tribuf_status <= PHASE_0;
+	 endcase // case ( tribuf_status )	 
       end
    end
    
@@ -191,20 +223,6 @@ module R2FFT
       end
    end
    
-   localparam MODE_INPUT_STREAM = 0;
-   localparam MODE_RUN_FFT = 1;
-   localparam MODE_DMA = 2;
-   localparam MODE_DISABLE = 3;
-   
-   reg [1:0] ramAccessMode;
-   always_comb begin
-      case ( status_f )
-        ST_RUN_FFT:      ramAccessMode = MODE_RUN_FFT;
-        ST_DONE:         ramAccessMode = MODE_DMA;
-        default:         ramAccessMode = MODE_DISABLE;
-      endcase
-   end
-
    wire [FFT_N-1:0] istreamAddr;
    
    // input data iterator
@@ -216,7 +234,7 @@ module R2FFT
      (
       .rst( rst ),
       .clk( clk ),
-      .clr( ibuf_status_f != ST_INPUT_STREAM ),
+      .clr( ibuf_status_f != IBUF_INPUT_STREAM ),
       .inc( sact_istream ),
       .iter( istreamAddr ),
       .count(),
@@ -251,7 +269,7 @@ module R2FFT
 
       .clr( (ibuf_status_f == IBUF_IDLE) ||
 	    run ),
-      .bw_act( sact_istream && (ibuf_status_f == ST_INPUT_STREAM) ),
+      .bw_act( sact_istream && (ibuf_status_f == IBUF_INPUT_STREAM) ),
       .bw( istreamBw ),
       .max_bw( istreamMaxBw )
       
@@ -409,7 +427,7 @@ module R2FFT
       .twiddleFactorAddr( twiddleFactorAddr )
       
       );
-   
+
    // block ram0
    wire       ract_fft0;
    wire [FFT_N-1-1:0] ra_fft0;
@@ -480,43 +498,68 @@ module R2FFT
       
       );
 
+
+   //////////////////////////
+   // memory bus mux
+   //////////////////////////
+   localparam MODE_INPUT_STREAM = 0;
+   localparam MODE_RUN_FFT = 1;
+   localparam MODE_DMA = 2;
+   localparam MODE_DISABLE = 3;
+   
    reg         dmaa_lsb;
    always @ ( posedge clk ) begin
       dmaa_lsb <= dmaa[0];
    end
 
    wire [FFT_DW*2-1:0] rdr_dma0;
-   readBusMux 
+
+   readBusMux_tribuf
      #(
        .FFT_N(FFT_N),
        .FFT_DW(FFT_DW),
+       .PHASE_0(PHASE_0),
+       .PHASE_1(PHASE_1),
+       .PHASE_2(PHASE_2),
        .MODE_INPUT_STREAM(MODE_INPUT_STREAM),
        .MODE_RUN_FFT(MODE_RUN_FFT),
        .MODE_DMA(MODE_DMA),
        .MODE_DISABLE(MODE_DISABLE)
        )
-     readBusMuxEven
+   readBusMuxEven
      (
-      .mode( ramAccessMode ),
+      .tribuf_status(tribuf_status),
+      .ract_fft(ract_fft0),
+      .ra_fft(ra_fft0),
+      .rdr_fft(rdr_fft0),
       
-      .ract_fft( ract_fft0 ),
-      .ra_fft( ra_fft0 ),
-      .rdr_fft( rdr_fft0 ),
-      
-      .ract_dma( dmaact && (dmaa[0] == 1'b0) ),
-      .ra_dma( dmaa[FFT_N-1:1] ),
-      .rdr_dma( rdr_dma0 ),
+      .ract_dma(dmaact && (dmaa[0] == 1'b0)),
+      .ra_dma(dmaa[FFT_N-1:1]),
+      .rdr_dma(rdr_dma0),
 
-      .ract_ram( ract_ram0 ),
-      .ra_ram( ra_ram0 ),
-      .rdr_ram( rdr_ram0 )
+      .ract_ram_bank0(ract_ram0_bank0),
+      .ra_ram_bank0(ra_ram0_bank0),
+      .rdr_ram_bank0(rdr_ram0_bank0),
+      
+      .ract_ram_bank1(ract_ram0_bank1),
+      .ra_ram_bank1(ra_ram0_bank1),
+      .rdr_ram_bank1(rdr_ram0_bank1),
+      
+      .ract_ram_bank2(ract_ram0_bank2),
+      .ra_ram_bank2(ra_ram0_bank2),
+      .rdr_ram_bank2(rdr_ram0_bank2)
+      
       );
-
+   
+   
    wire [FFT_DW*2-1:0] rdr_dma1;
-   readBusMux 
+   readBusMux_tribuf
      #(
        .FFT_N(FFT_N),
        .FFT_DW(FFT_DW),
+       .PHASE_0(PHASE_0),
+       .PHASE_1(PHASE_1),
+       .PHASE_2(PHASE_2),
        .MODE_INPUT_STREAM(MODE_INPUT_STREAM),
        .MODE_RUN_FFT(MODE_RUN_FFT),
        .MODE_DMA(MODE_DMA),
@@ -524,27 +567,40 @@ module R2FFT
        )
    readBusMuxOdd
      (
-      .mode( ramAccessMode ),
+      .tribuf_status(tribuf_status),
+      .ract_fft(ract_fft1),
+      .ra_fft(ra_fft1),
+      .rdr_fft(rdr_fft1),
+      
+      .ract_dma(dmaact && (dmaa[0] == 1'b1)),
+      .ra_dma(dmaa[FFT_N-1:1]),
+      .rdr_dma(rdr_dma1),
 
-      .ract_fft( ract_fft1 ),
-      .ra_fft( ra_fft1 ),
-      .rdr_fft( rdr_fft1 ),
-
-      .ract_dma( dmaact && (dmaa[0] == 1'b1) ),
-      .ra_dma( dmaa[FFT_N-1:1] ),
-      .rdr_dma( rdr_dma1 ),
-
-      .ract_ram( ract_ram1 ),
-      .ra_ram( ra_ram1 ),
-      .rdr_ram( rdr_ram1 )
+      .ract_ram_bank0(ract_ram1_bank0),
+      .ra_ram_bank0(ra_ram1_bank0),
+      .rdr_ram_bank0(rdr_ram1_bank0),
+      
+      .ract_ram_bank1(ract_ram1_bank1),
+      .ra_ram_bank1(ra_ram1_bank1),
+      .rdr_ram_bank1(rdr_ram1_bank1),
+      
+      .ract_ram_bank2(ract_ram1_bank2),
+      .ra_ram_bank2(ra_ram1_bank2),
+      .rdr_ram_bank2(rdr_ram1_bank2)
+      
       );
+   
+   ////////////////////////
 
    assign { dmadr_imag, dmadr_real } = (dmaa_lsb == 1'b0) ? rdr_dma0 : rdr_dma1;
-   
-   writeBusMux 
+
+   writeBusMux_tribuf
      #(
        .FFT_N(FFT_N),
        .FFT_DW(FFT_DW),
+       .PHASE_0(PHASE_0),
+       .PHASE_1(PHASE_1),
+       .PHASE_2(PHASE_2),
        .MODE_INPUT_STREAM(MODE_INPUT_STREAM),
        .MODE_RUN_FFT(MODE_RUN_FFT),
        .MODE_DMA(MODE_DMA),
@@ -552,45 +608,64 @@ module R2FFT
        )
    writeBusMuxEven
      (
-      .mode( ramAccessMode ),
-
-      .wact_fft( wact_fft0 ),
-      .wa_fft( wa_fft0 ),
-      .wdw_fft( wdw_fft0 ),
+      .tribuf_status(tribuf_status),
+      .wact_fft(wact_fft0),
+      .wa_fft(wa_fft0),
+      .wdw_fft(wdw_fft0),
 
       .wact_istream( sact_istream && (istreamAddr[0] == 1'b0) ),
-      .wa_istream( istreamAddr[FFT_N-1:1] ),
+      .wa_istream(istreamAddr[FFT_N-1:1]),
       .wdw_istream( { sdw_istream_imag, sdw_istream_real } ),
 
-      .wact_ram( wact_ram0 ),
-      .wa_ram( wa_ram0 ),
-      .wdw_ram( wdw_ram0 )      
+      .wact_ram_bank0( wact_ram0_bank0 ),
+      .wa_ram_bank0( wa_ram0_bank0 ),
+      .wdw_ram_bank0( wdw_ram0_bank0 ),
+      
+      .wact_ram_bank1( wact_ram0_bank1 ),
+      .wa_ram_bank1( wa_ram0_bank1 ),
+      .wdw_ram_bank1( wdw_ram0_bank1 ),
+      
+      .wact_ram_bank2( wact_ram0_bank2 ),
+      .wa_ram_bank2( wa_ram0_bank2 ),
+      .wdw_ram_bank2( wdw_ram0_bank2 )
+      
       );
+   
 
-   writeBusMux 
+   writeBusMux_tribuf
      #(
        .FFT_N(FFT_N),
        .FFT_DW(FFT_DW),
+       .PHASE_0(PHASE_0),
+       .PHASE_1(PHASE_1),
+       .PHASE_2(PHASE_2),
        .MODE_INPUT_STREAM(MODE_INPUT_STREAM),
        .MODE_RUN_FFT(MODE_RUN_FFT),
        .MODE_DMA(MODE_DMA),
        .MODE_DISABLE(MODE_DISABLE)
        )
-     writeBusMuxOdd
+   writeBusMuxOdd
      (
-      .mode ( ramAccessMode ),
-
-      .wact_fft( wact_fft1 ),
-      .wa_fft( wa_fft1 ),
-      .wdw_fft( wdw_fft1 ),
+      .tribuf_status(tribuf_status),
+      .wact_fft(wact_fft1),
+      .wa_fft(wa_fft1),
+      .wdw_fft(wdw_fft1),
 
       .wact_istream( sact_istream && (istreamAddr[0] == 1'b1) ),
-      .wa_istream( istreamAddr[FFT_N-1:1] ),
+      .wa_istream(istreamAddr[FFT_N-1:1]),
       .wdw_istream( { sdw_istream_imag, sdw_istream_real } ),
 
-      .wact_ram( wact_ram1 ),
-      .wa_ram( wa_ram1 ),
-      .wdw_ram( wdw_ram1 )
+      .wact_ram_bank0( wact_ram1_bank0 ),
+      .wa_ram_bank0( wa_ram1_bank0 ),
+      .wdw_ram_bank0( wdw_ram1_bank0 ),
+      
+      .wact_ram_bank1( wact_ram1_bank1 ),
+      .wa_ram_bank1( wa_ram1_bank1 ),
+      .wdw_ram_bank1( wdw_ram1_bank1 ),
+      
+      .wact_ram_bank2( wact_ram1_bank2 ),
+      .wa_ram_bank2( wa_ram1_bank2 ),
+      .wdw_ram_bank2( wdw_ram1_bank2 )
       
       );
    
