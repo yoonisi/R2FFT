@@ -93,6 +93,8 @@ Embedded Multiplier 9-bit elements : 6 / 132 ( 5 % )
 
 ## Testbench
 
+* example of FFT and IFFT
+
 ![bench](doc/sim_wave.png)
 
 
