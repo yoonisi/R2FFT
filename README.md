@@ -10,6 +10,7 @@ R2FFT is a fully synthesizable verilog module for doing the FFT on an FPGA or AS
 * Configurable data width.
 * Support block floating point scaling.
 * Small footprint implementation of single raidx-2 algorithm.
+* FFT_LENGTH/2 \* log2(FFT_LENGTH) clock latency. 
 * Forward and inverse FFT.
 * Fully synthesizable, easy implementation to a FPGA or ASIC.
 
@@ -89,4 +90,9 @@ Embedded Multiplier 9-bit elements : 6 / 132 ( 5 % )
 | Fmax       | Restricted Fmax | Clock Name | Note |  
 |:-----------|:----------------|:-----------|:-----|
 | 110.05 MHz | 110.05 MHz      | clk        |      |  
+
+## Testbench
+
+![bench](doc/sim_wave.png)
+
 
