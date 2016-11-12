@@ -43,51 +43,53 @@ module R2FFT_tribuf
     input wire [FFT_DW-1:0] 	    twdr_cos,
     
     // block ram0
+    // bank0
     output wire 		    ract_ram0_bank0,
     output wire [FFT_N-1-1:0] 	    ra_ram0_bank0,
     input wire [FFT_DW*2-1:0] 	    rdr_ram0_bank0,
-   
+    // bank1
     output wire 		    wact_ram0_bank1,
     output wire [FFT_N-1-1:0] 	    wa_ram0_bank1,
     output wire [FFT_DW*2-1:0] 	    wdw_ram0_bank1,
-
+    // bank2
     output wire 		    ract_ram0_bank2,
     output wire [FFT_N-1-1:0] 	    ra_ram0_bank2,
     input wire [FFT_DW*2-1:0] 	    rdr_ram0_bank2,
-   
+    // bank0
     output wire 		    wact_ram0_bank0,
     output wire [FFT_N-1-1:0] 	    wa_ram0_bank0,
     output wire [FFT_DW*2-1:0] 	    wdw_ram0_bank0,
-
+    // bank1
     output wire 		    ract_ram0_bank1,
     output wire [FFT_N-1-1:0] 	    ra_ram0_bank1,
     input wire [FFT_DW*2-1:0] 	    rdr_ram0_bank1,
-   
+    // bank2
     output wire 		    wact_ram0_bank2,
     output wire [FFT_N-1-1:0] 	    wa_ram0_bank2,
     output wire [FFT_DW*2-1:0] 	    wdw_ram0_bank2,
    
     // block ram1
+    // bank0
     output wire 		    ract_ram1_bank0,
     output wire [FFT_N-1-1:0] 	    ra_ram1_bank0,
     input wire [FFT_DW*2-1:0] 	    rdr_ram1_bank0,
-
+    // bank1
     output wire 		    wact_ram1_bank1,
     output wire [FFT_N-1-1:0] 	    wa_ram1_bank1,
     output wire [FFT_DW*2-1:0] 	    wdw_ram1_bank1,
-   
+    // bank2
     output wire 		    ract_ram1_bank2,
     output wire [FFT_N-1-1:0] 	    ra_ram1_bank2,
     input wire [FFT_DW*2-1:0] 	    rdr_ram1_bank2,
-
+    // bank0
     output wire 		    wact_ram1_bank0,
     output wire [FFT_N-1-1:0] 	    wa_ram1_bank0,
     output wire [FFT_DW*2-1:0] 	    wdw_ram1_bank0,
-   
+    // bank1
     output wire 		    ract_ram1_bank1,
     output wire [FFT_N-1-1:0] 	    ra_ram1_bank1,
     input wire [FFT_DW*2-1:0] 	    rdr_ram1_bank1,
-
+    // bank2
     output wire 		    wact_ram1_bank2,
     output wire [FFT_N-1-1:0] 	    wa_ram1_bank2,
     output wire [FFT_DW*2-1:0] 	    wdw_ram1_bank2
@@ -589,10 +591,10 @@ module R2FFT_tribuf
       .rdr_ram_bank2(rdr_ram1_bank2)
       
       );
-   
-   ////////////////////////
 
    assign { dmadr_imag, dmadr_real } = (dmaa_lsb == 1'b0) ? rdr_dma0 : rdr_dma1;
+   
+   // write bus mux
 
    writeBusMux_tribuf
      #(
