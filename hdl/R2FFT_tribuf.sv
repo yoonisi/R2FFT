@@ -23,7 +23,7 @@ module R2FFT_tribuf
     // status
     output wire 		    done,
     output wire [2:0] 		    status,
-    output wire 		    input_buffer_status,
+    output wire [1:0] 		    input_buffer_status,
     output wire signed [7:0] 	    bfpexp,
 
     // input stream
@@ -144,6 +144,7 @@ module R2FFT_tribuf
 			     } ibuf_status_t;
    ibuf_status_t ibuf_status_f;
    ibuf_status_t ibuf_status_n;
+   assign input_buffer_status = ibuf_status_f;
    always @ ( posedge clk ) begin
       if ( rst ) begin
 	 ibuf_status_f <= IBUF_IDLE;
@@ -159,6 +160,8 @@ module R2FFT_tribuf
 	  begin
 	     if ( streamBufferFull ) begin
 		ibuf_status_n = IBUF_FULL_BUFFER;
+	     end else begin
+		ibuf_status_n = IBUF_INPUT_STREAM;
 	     end
 	  end
 	IBUF_FULL_BUFFER:
@@ -170,7 +173,7 @@ module R2FFT_tribuf
 	     end
 	  end
 	default: ibuf_status_n = IBUF_IDLE;
-      endcase // case ( ibuf_state_f )
+      endcase // case ( ibuf_status_f )
    end
    
    
