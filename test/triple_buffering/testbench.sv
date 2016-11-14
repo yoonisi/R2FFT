@@ -22,6 +22,7 @@ module testbench;
       begin
 	 for ( i = 0; i < FFT_LENGTH; i++ ) begin
 	    inputData( ampl * $sin( 2.0 * M_PI * freq * i / FFT_LENGTH ), 0 );
+	    wait_clk( 2 );
 	 end
       end
    endtask // inputSinWave
@@ -78,13 +79,13 @@ module testbench;
       wait_clk( 10 );
 
       // stage 
-      inputSineWave( 0.5, frameCount++ + 10);
+      inputSineWave( 0.5, 50 * frameCount++ + 10);
 
       // 
       triggerRunFft();
       fork
 	 begin
-	    inputSineWave( 0.5, frameCount++ + 10 );
+	    inputSineWave( 0.5, 50 * frameCount++ + 10 );
 	 end
 	 begin
 	    waitFftProcess();
@@ -92,11 +93,11 @@ module testbench;
       join
 
       //
-      for ( i = 0; i < 3; i++ ) begin
+      for ( i = 0; i < 5; i++ ) begin
 	 triggerRunFft();
 	 fork
 	    begin
-	       inputSineWave(0.5, frameCount++ + 10 );
+	       inputSineWave(0.5, 50 * frameCount++ + 10 );
 	    end
 	    begin
 	       waitFftProcess();

@@ -158,7 +158,7 @@ module R2FFT_tribuf
 	IBUF_IDLE:           ibuf_status_n = IBUF_INPUT_STREAM;
 	IBUF_INPUT_STREAM:
 	  begin
-	     if ( streamBufferFull ) begin
+	     if ( streamBufferFull && sact_istream ) begin
 		ibuf_status_n = IBUF_FULL_BUFFER;
 	     end else begin
 		ibuf_status_n = IBUF_INPUT_STREAM;
