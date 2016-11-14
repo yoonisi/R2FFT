@@ -318,6 +318,9 @@ module R2FFT_tribuf
    wire [FFT_BFPDW-1:0]  nextBfpBw;
    wire        iteratorDone;
    wire        oactFftUnit;
+   wire signed [7:0] bfp_exponent;
+   reg signed [7:0]  bfpexp_f;
+   assign bfpexp = bfpexp_f;
 
    bfp_bitWidthAcc 
      #(
@@ -337,9 +340,18 @@ module R2FFT_tribuf
       .bw_new( nextBfpBw ),
       
       .bfp_bw( currentBfpBw ),
-      .bfp_exponent( bfpexp )
-      
+      .bfp_exponent( bfp_exponent )
       );
+
+   always @ ( posedge clk ) begin
+      if ( rst ) begin
+	 bfpexp_f <= 8'h00;
+      end else begin
+	 if ( sb_state_f == SB_NEXT_STAGE && fftStageCountFull ) begin
+	    bfpexp_f <= bfp_exponent;
+	 end
+      end
+   end
    
    always_comb begin
       if ( !run_fft ) begin
