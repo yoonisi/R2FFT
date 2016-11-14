@@ -88,13 +88,14 @@ module writeBusMux_tribuf
      (
       .mode(bank0_mode),
       .wact_fft(wact_fft),
+      .wa_fft(wa_fft),
       .wdw_fft(wdw_fft),
       .wact_istream(wact_istream),
       .wa_istream(wa_istream),
       .wdw_istream(wdw_istream),
       .wact_ram(wact_ram_bank0),
-      .wa_ram(wa_ram0_bank0),
-      .wdw_ram(wdw_ram0_bank0)
+      .wa_ram(wa_ram_bank0),
+      .wdw_ram(wdw_ram_bank0)
       );
    
    // bank1 //////////////////
@@ -111,13 +112,14 @@ module writeBusMux_tribuf
      (
       .mode(bank1_mode),
       .wact_fft(wact_fft),
+      .wa_fft(wa_fft),
       .wdw_fft(wdw_fft),
       .wact_istream(wact_istream),
       .wa_istream(wa_istream),
       .wdw_istream(wdw_istream),
       .wact_ram(wact_ram_bank1),
-      .wa_ram(wa_ram0_bank1),
-      .wdw_ram(wdw_ram0_bank1)
+      .wa_ram(wa_ram_bank1),
+      .wdw_ram(wdw_ram_bank1)
       );
 
    // bank2 //////////////////
@@ -134,13 +136,14 @@ module writeBusMux_tribuf
      (
       .mode(bank2_mode),
       .wact_fft(wact_fft),
+      .wa_fft(wa_fft),
       .wdw_fft(wdw_fft),
       .wact_istream(wact_istream),
       .wa_istream(wa_istream),
       .wdw_istream(wdw_istream),
       .wact_ram(wact_ram_bank2),
-      .wa_ram(wa_ram0_bank2),
-      .wdw_ram(wdw_ram0_bank2)
+      .wa_ram(wa_ram_bank2),
+      .wdw_ram(wdw_ram_bank2)
       );
 
 endmodule // ramWriteBusMux

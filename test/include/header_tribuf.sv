@@ -18,8 +18,8 @@
    reg [2:0] status_reg = 3'bZZZ;
    wire [2:0] status = status_reg;
 
-reg [1:0] input_buffer_status_reg = 2'bZZ;
-wire [1:0] input_buffer_status = input_buffer_status_reg;
+   reg [1:0] input_buffer_status_reg = 2'bZZ;
+   wire [1:0] input_buffer_status = input_buffer_status_reg;
 
    reg signed [7:0] bfpexp_reg = 8'hZZ;
    wire signed [7:0] bfpexp = bfpexp_reg;
