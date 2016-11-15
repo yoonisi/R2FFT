@@ -97,7 +97,7 @@ module testbench;
 	 triggerRunFft();
 	 fork
 	    begin
-	       inputSineWave(0.7 - (i * 0.2), 50 * frameCount++ + 10 );
+	       inputSineWave(0.6 - (i * 0.2), 50 * frameCount++ + 10 );
 	    end
 	    begin
 	       waitFftProcess();
