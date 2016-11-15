@@ -64,13 +64,17 @@
    endtask //
 
    event strobeOutputData;
-   task automatic dumpFromDmaBus;
+   task automatic dumpFromDmaBus (
+				  input integer waitCount = 0
+				  );
       integer i;
       begin
 	 for ( i = 0; i < FFT_LENGTH; i++ ) begin
 	    dmaact_reg <= 1'b1;
 	    dmaa_reg <= i;
 	    wait_clk(1);
+	    dmaact_reg <= 1'b0;
+	    wait_clk( waitCount );
 	    -> strobeOutputData;
 	 end
 	 dmaact_reg <= 1'b0;

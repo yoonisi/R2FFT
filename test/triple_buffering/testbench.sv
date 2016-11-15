@@ -49,7 +49,7 @@ module testbench;
       reg signed [7:0] fftBfpExp;
       begin
 	 fftBfpExp = bfpexp;
-	 dumpFromDmaBus();
+	 dumpFromDmaBus(2);
 
 	 $display("");
 	 $display(",FFT Result");
@@ -79,13 +79,13 @@ module testbench;
       wait_clk( 10 );
 
       // stage 
-      inputSineWave( 0.5, 50 * frameCount++ + 10);
+      inputSineWave( 0.9, 50 * frameCount++ + 10);
 
       // 
       triggerRunFft();
       fork
 	 begin
-	    inputSineWave( 0.5, 50 * frameCount++ + 10 );
+	    inputSineWave( 0.7, 50 * frameCount++ + 10 );
 	 end
 	 begin
 	    waitFftProcess();
@@ -93,11 +93,11 @@ module testbench;
       join
 
       //
-      for ( i = 0; i < 5; i++ ) begin
+      for ( i = 0; i < 8; i++ ) begin
 	 triggerRunFft();
 	 fork
 	    begin
-	       inputSineWave(0.5, 50 * frameCount++ + 10 );
+	       inputSineWave(0.6 - (i * 0.2), 50 * frameCount++ + 10 );
 	    end
 	    begin
 	       waitFftProcess();
